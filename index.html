@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المُحدِّث التلقائي المستمر</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f9; 
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+        }
+        input { 
+            padding: 10px; 
+            margin: 5px; 
+            font-size: 16px; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            margin: 5px;
+        }
+        button.stop { background-color: #dc3545; }
+        iframe { 
+            width: 100%; 
+            height: 600px; 
+            border: 2px solid #ccc; 
+            border-radius: 8px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>أداة التحديث التلقائي المستمر</h2>
+        <input type="text" id="urlInput" placeholder="أدخل الرابط (مثال: https://example.com)" style="width: 80%;">
+        <br>
+        <input type="number" id="timeInput" placeholder="الوقت بين التحديثات (بالثواني)" value="5" style="width: 80%;">
+        <br>
+        <button onclick="startRefresh()">بدء التحديث</button>
+        <button class="stop" onclick="stopRefresh()">إيقاف التحديث</button>
+
+        <p id="status" style="color: gray; font-weight: bold;">الحالة: متوقف</p>
+    </div>
+
+    <!-- الإطار الذي سيعرض الموقع -->
+    <iframe id="viewer" src=""></iframe>
+
+    <script>
+        let refreshInterval;
+        let isRefreshing = false;
+
+        function startRefresh() {
+            let url = document.getElementById("urlInput").value;
+            let time = document.getElementById("timeInput").value * 1000; // تحويل الثواني إلى ميلي ثانية
+
+            if (!url) {
+                alert("الرجاء إدخال رابط الموقع أولاً!");
+                return;
+            }
+
+            // إضافة https:// إذا نسي المستخدم كتابتها
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "https://" + url;
+            }
+
+            document.getElementById("viewer").src = url;
+            document.getElementById("status").innerHTML = "الحالة: جاري التحديث كل " + (time/1000) + " ثواني... (لن يتوقف حتى تضغط إيقاف)";
+            document.getElementById("status").style.color = "green";
+
+            // لتجنب تشغيل أكثر من مؤقت في نفس الوقت إذا ضغط المستخدم "بدء" مرتين
+            if (isRefreshing) {
+                clearInterval(refreshInterval);
+            }
+
+            isRefreshing = true;
+
+            // إعداد المؤقت لتحديث الإطار
+            refreshInterval = setInterval(function() {
+                let iframe = document.getElementById("viewer");
+                iframe.src = iframe.src; // إعادة تحميل الرابط
+            }, time);
+        }
+
+        function stopRefresh() {
+            if (isRefreshing) {
+                clearInterval(refreshInterval);
+                isRefreshing = false;
+                document.getElementById("status").innerHTML = "الحالة: تم إيقاف التحديث.";
+                document.getElementById("status").style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
